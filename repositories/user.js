@@ -18,7 +18,7 @@ const getUsers = async (limit, page) => {
     return users.map((item) => {
       return {
        ...item.dataValues,
-       'role': item.role.name,
+       role: item.role.name,
       }
     });
   } catch (exception) {
@@ -51,6 +51,28 @@ const deleteUser = async (userId) => {
     }
     await user.destroy();
     return null;
+  } catch (exception) {
+    throw new Exception(exception.message);
+  }
+};
+
+const checkPass = async ( userId, password ) => {
+  try {
+    const user = await User.findByPk(userId,{
+      include: [
+        {
+          model: Role,
+        },
+      ],
+      attributes: ['userId', 'name', 'email', 'password'],
+    });
+    console.log(userId, password)
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!user || !isMatch) {
+      throw new Exception(Exception.WRONG_EMAIL_OR_PASSWORD);
+    }
+    return
   } catch (exception) {
     throw new Exception(exception.message);
   }
@@ -192,4 +214,5 @@ export default {
   register,
   updateUser,
   changePassword,
+  checkPass
 };

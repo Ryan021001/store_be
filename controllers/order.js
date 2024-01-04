@@ -1,6 +1,5 @@
-import { param } from 'express-validator';
 import HttpStatusCode from '../exceptions/HttpStatusCode.js';
-import { orderRepository } from '../repositories/index.js';
+import { orderRepository, userRepository } from '../repositories/index.js';
 
 async function getOrders(req, res) {
   try {
@@ -52,15 +51,14 @@ async function updateOrder(req, res) {
 const insertOrder = async (req, res) => {
   try {
     debugger;
-    const { cartId, orderDate, userId, addressId } = req.body;
-
+    const { cartId, orderDate, userId, addressId, password } = req.body;
+    await userRepository.checkPass(userId, password)
     const insertOrder = await orderRepository.insertOrder({
       cartId,
       orderDate,
       userId,
       addressId,
     });
-
     res.status(HttpStatusCode.INSERT_OK).json(insertOrder);
   } catch (exception) {
     res.status(HttpStatusCode.INTERNAL_SERVER_ERROR).json(exception.toString());
